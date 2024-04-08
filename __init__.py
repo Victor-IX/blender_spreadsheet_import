@@ -98,10 +98,8 @@ def read_csv_data(
     add_data_fields(mesh, data_fields)
 
     with open(filepath, "r", encoding=encoding, newline="") as csv_file:
-        # print("importing {file} without the first {lines}".format(file=filepath, lines=leading_liens_to_discard))
         discarded_leading_lines = 0
         while discarded_leading_lines < leading_liens_to_discard:
-            # print("discarded line " + discarded_leading_lines + ": " + line)
             discarded_leading_lines = discarded_leading_lines + 1
 
         csv_reader = csv.DictReader(csv_file, delimiter=delimiter)
@@ -241,9 +239,6 @@ class ImportSpreadsheetData(bpy.types.Operator, ImportHelper):
 
     bl_idname = "import.spreadsheet"  # important since its how bpy.ops.import.spreadsheet is constructed
     bl_label = "Import Spreadsheet"
-
-    # ImportHelper mixin class uses this
-    # filename_ext = ".json;.csv"
 
     # List of operator properties, the attributes will be assigned
     # to the class instance from the operator settings before calling.
