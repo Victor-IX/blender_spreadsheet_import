@@ -26,7 +26,6 @@ def read_json_data(
 
     data_array = data[data_array_name]
 
-    # name of the object and mesh
     mesh = bpy.data.meshes.new(name="json_" + data_array_name)
     mesh.vertices.add(len(data_array))
     # coordinates = np.ones((len(data_array)*3))
@@ -100,6 +99,7 @@ def read_csv_data(
     with open(filepath, "r", encoding=encoding, newline="") as csv_file:
         discarded_leading_lines = 0
         while discarded_leading_lines < leading_liens_to_discard:
+            csv_file.readline()
             discarded_leading_lines = discarded_leading_lines + 1
 
         csv_reader = csv.DictReader(csv_file, delimiter=delimiter)
@@ -192,7 +192,6 @@ class SPREADSHEET_UL_data_fields(bpy.types.UIList):
         self, context, layout, data, item, icon, active_data, active_propname, index
     ):
         # item is a DataFieldPropertiesGroup
-        # print(type(item.name))
         if self.layout_type in {"DEFAULT", "COMPACT"}:
             # layout.label(text=item.name, icon = custom_icon)
             layout.prop(data=item, property="name", text="")
@@ -334,6 +333,7 @@ class AddDataFieldOperator(bpy.types.Operator):
     def execute(self, context):
         sfile = context.space_data
         operator = sfile.active_operator
+        operator.data_fields.add()
 
         operator.active_data_field_index = len(operator.data_fields) - 1
 
