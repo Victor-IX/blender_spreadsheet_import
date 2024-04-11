@@ -93,8 +93,7 @@ def read_csv_data(
     report_message = ""
 
     mesh = bpy.data.meshes.new(name="csv_data")
-
-    add_data_fields(mesh, data_fields)
+    add_data_fields(mesh, data_fields, filepath)
 
     with open(filepath, "r", encoding=encoding, newline="") as csv_file:
         discarded_leading_lines = 0
@@ -135,6 +134,7 @@ def read_csv_data(
                     0.0,
                 )  # set vertex x position according to index
                 i = i + 1
+
         except ValueError as e:
             error_message = repr(e)
             report_type = "WARNING"
@@ -167,14 +167,38 @@ def read_csv_data(
     return report_message, report_type
 
 
-def add_data_fields(mesh, data_fields):
+def add_data_fields(
+    mesh,
+    data_fields,
+    filepath,
+    encoding="latin-1",
+    delimiter=",",
+    leading_liens_to_discard=0,
+):
     # add custom data
-    for data_field in data_fields:
-        mesh.attributes.new(
-            name=data_field.name if data_field.name else "empty_key_string",
-            type=data_field.dataType,
-            domain="POINT",
-        )
+    if data_fields:
+        for data_field in data_fields:
+            mesh.attributes.new(
+                name=data_field.name if data_field.name else "empty_key_string",
+                type=data_field.dataType,
+                domain="POINT",
+            )
+    else:
+        with open(filepath, "r", encoding=encoding, newline="") as csv_file:
+            discarded_leading_lines = 0
+            while discarded_leading_lines < leading_liens_to_discard:
+                csv_file.readline()
+                discarded_leading_lines = discarded_leading_lines + 1
+
+            csv_reader = csv.DictReader(csv_file, delimiter=delimiter)
+            first_row = next(csv_reader)
+
+            for data_field in first_row.items():
+                mesh.attributes.new(
+                    name=data_field[0] if data_field[0] else "empty_key_string",
+                    type="FLOAT",
+                    domain="POINT",
+                )
 
 
 def create_object(mesh, name):
