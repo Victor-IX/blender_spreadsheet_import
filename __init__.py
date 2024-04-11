@@ -102,6 +102,7 @@ def read_csv_data(
             discarded_leading_lines = discarded_leading_lines + 1
 
         csv_reader = csv.DictReader(csv_file, delimiter=delimiter)
+        first_row = next(csv_reader)
 
         error_message = ""
         i = 0
@@ -109,24 +110,37 @@ def read_csv_data(
             for row in csv_reader:
                 # make sure it's the right data type
                 # raises ValueError if the datatype can not be converted
-                for data_field in data_fields:
-                    value = row[data_field.name]
-                    if data_field.dataType == "FLOAT":
+                if data_fields:
+                    for data_field in data_fields:
+                        value = row[data_field.name]
+                        if data_field.dataType == "FLOAT":
+                            value = float(value)
+                        elif data_field.dataType == "INT":
+                            value = int(value)
+                        elif data_field.dataType == "BOOLEAN":
+                            value = bool(value)
+                        row[data_field.name] = value
+                else:
+                    for data_field in first_row.items():
+                        value = row[data_field[0]]
                         value = float(value)
-                    elif data_field.dataType == "INT":
-                        value = int(value)
-                    elif data_field.dataType == "BOOLEAN":
-                        value = bool(value)
-                    row[data_field.name] = value
+                        row[data_field[0]] = value
 
+                
                 mesh.vertices.add(1)
                 mesh.update()  # might be slow, but does it matter?...
 
                 # assign row values to mesh attribute values
-                for data_field in data_fields:
-                    mesh.attributes[
-                        data_field.name if data_field.name else "empty_key_string"
-                    ].data[i].value = row[data_field.name]
+                if data_fields:
+                    for data_field in data_fields:
+                        mesh.attributes[
+                            data_field.name if data_field.name else "empty_key_string"
+                        ].data[i].value = row[data_field.name]
+                else:
+                    for data_field in first_row.items():
+                        mesh.attributes[
+                            data_field[0] if data_field[0] else "empty_key_string"
+                        ].data[i].value = row[data_field[0]]
 
                 mesh.vertices[i].co = (
                     0.01 * i,
